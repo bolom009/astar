@@ -5,13 +5,16 @@
 // Package astar implements the A* search algorithm for finding least-cost paths.
 package astar
 
-import "container/heap"
+import (
+	"container/heap"
+	"iter"
+)
 
 // The Graph interface is the minimal interface a graph data structure
 // must satisfy to be suitable for the A* algorithm.
 type Graph[Node any] interface {
 	// Neighbours returns the neighbour nodes of node n in the graph.
-	Neighbours(n Node) []Node
+	Neighbours(n Node) iter.Seq[Node]
 }
 
 // A CostFunc is a function that returns a cost for the transition
@@ -71,7 +74,7 @@ func FindPath[Node comparable](g Graph[Node], start, dest Node, d, h CostFunc[No
 		}
 		closed[n] = true
 
-		for _, nb := range g.Neighbours(n) {
+		for nb := range g.Neighbours(n) {
 			cp := p.cont(nb)
 			heap.Push(pq, &item[Path[Node]]{
 				value:    cp,

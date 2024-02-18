@@ -7,6 +7,7 @@ package astar_test
 import (
 	"fmt"
 	"image"
+	"iter"
 	"math"
 
 	"github.com/fzipp/astar"
@@ -68,22 +69,25 @@ func distance(p, q image.Point) float64 {
 
 type floorPlan []string
 
+var offsets = [...]image.Point{
+	image.Pt(0, -1), // North
+	image.Pt(1, 0),  // East
+	image.Pt(0, 1),  // South
+	image.Pt(-1, 0), // West
+}
+
 // Neighbours implements the astar.Graph[Node] interface (with Node = image.Point).
-func (f floorPlan) Neighbours(p image.Point) []image.Point {
-	offsets := []image.Point{
-		image.Pt(0, -1), // North
-		image.Pt(1, 0),  // East
-		image.Pt(0, 1),  // South
-		image.Pt(-1, 0), // West
-	}
-	res := make([]image.Point, 0, 4)
-	for _, off := range offsets {
-		q := p.Add(off)
-		if f.isFreeAt(q) {
-			res = append(res, q)
+func (f floorPlan) Neighbours(p image.Point) iter.Seq[image.Point] {
+	return func(yield func(image.Point) bool) {
+		for _, off := range offsets {
+			q := p.Add(off)
+			if f.isFreeAt(q) {
+				if !yield(q) {
+					return
+				}
+			}
 		}
 	}
-	return res
 }
 
 func (f floorPlan) isFreeAt(p image.Point) bool {
