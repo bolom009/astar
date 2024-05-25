@@ -55,8 +55,9 @@ func (p Path[Node]) Cost(d CostFunc[Node]) (c float64) {
 
 // FindPath finds the least-cost path between start and dest in graph g
 // using the cost function d and the cost heuristic function h.
+// Returns nil if no path was found.
 func FindPath[Node comparable](g Graph[Node], start, dest Node, d, h CostFunc[Node]) Path[Node] {
-	closed := make(map[Node]bool)
+	var closed set[Node]
 
 	pq := &priorityQueue[Path[Node]]{}
 	heap.Init(pq)
@@ -65,14 +66,14 @@ func FindPath[Node comparable](g Graph[Node], start, dest Node, d, h CostFunc[No
 	for pq.Len() > 0 {
 		p := heap.Pop(pq).(*item[Path[Node]]).value
 		n := p.last()
-		if closed[n] {
+		if closed.Contains(n) {
 			continue
 		}
 		if n == dest {
 			// Path found
 			return p
 		}
-		closed[n] = true
+		closed.Add(n)
 
 		for nb := range g.Neighbours(n) {
 			cp := p.cont(nb)
