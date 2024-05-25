@@ -9,6 +9,7 @@ import (
 	"image"
 	"iter"
 	"math"
+	"slices"
 
 	"github.com/fzipp/astar"
 )
@@ -76,15 +77,5 @@ func (g graph[Node]) link(a, b Node) graph[Node] {
 
 // Neighbours returns the neighbour nodes of node n in the graph.
 func (g graph[Node]) Neighbours(n Node) iter.Seq[Node] {
-	return sliceSeq(g[n])
-}
-
-func sliceSeq[T any](s []T) iter.Seq[T] {
-	return func(yield func(T) bool) {
-		for _, e := range s {
-			if !yield(e) {
-				return
-			}
-		}
-	}
+	return slices.Values(g[n])
 }
