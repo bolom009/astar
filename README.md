@@ -35,13 +35,14 @@ package main
 import (
 	"fmt"
 	"image"
+	"iter"
 	"math"
 
 	"github.com/fzipp/astar"
 )
 
 func main() {
-	maze := graph{
+	maze := floorPlan{
 		"###############",
 		"#   # #     # #",
 		"# ### ### ### #",
@@ -78,40 +79,43 @@ func nodeDist(p, q image.Point) float64 {
 	return math.Sqrt(float64(d.X*d.X + d.Y*d.Y))
 }
 
-type graph []string
+type floorPlan []string
+
+var offsets = [...]image.Point{
+	image.Pt(0, -1), // North
+	image.Pt(1, 0),  // East
+	image.Pt(0, 1),  // South
+	image.Pt(-1, 0), // West
+}
 
 // Neighbours implements the astar.Graph[Node] interface (with Node = image.Point).
-func (g graph) Neighbours(p image.Point) []image.Point {
-	offsets := []image.Point{
-		image.Pt(0, -1), // North
-		image.Pt(1, 0),  // East
-		image.Pt(0, 1),  // South
-		image.Pt(-1, 0), // West
-	}
-	res := make([]image.Point, 0, 4)
-	for _, off := range offsets {
-		q := p.Add(off)
-		if g.isFreeAt(q) {
-			res = append(res, q)
+func (f floorPlan) Neighbours(p image.Point) iter.Seq[image.Point] {
+	return func(yield func(image.Point) bool) {
+		for _, off := range offsets {
+			q := p.Add(off)
+			if f.isFreeAt(q) {
+				if !yield(q) {
+					return
+				}
+			}
 		}
 	}
-	return res
 }
 
-func (g graph) isFreeAt(p image.Point) bool {
-	return g.isInBounds(p) && g[p.Y][p.X] == ' '
+func (f floorPlan) isFreeAt(p image.Point) bool {
+	return f.isInBounds(p) && f[p.Y][p.X] == ' '
 }
 
-func (g graph) isInBounds(p image.Point) bool {
-	return (0 <= p.X && p.X < len(g[p.Y])) && (0 <= p.Y && p.Y < len(g))
+func (f floorPlan) isInBounds(p image.Point) bool {
+	return (0 <= p.X && p.X < len(f[p.Y])) && (0 <= p.Y && p.Y < len(f))
 }
 
-func (g graph) put(p image.Point, c rune) {
-	g[p.Y] = g[p.Y][:p.X] + string(c) + g[p.Y][p.X+1:]
+func (f floorPlan) put(p image.Point, c rune) {
+	f[p.Y] = f[p.Y][:p.X] + string(c) + f[p.Y][p.X+1:]
 }
 
-func (g graph) print() {
-	for _, row := range g {
+func (f floorPlan) print() {
+	for _, row := range f {
 		fmt.Println(row)
 	}
 }
@@ -154,7 +158,9 @@ package main
 import (
 	"fmt"
 	"image"
+	"iter"
 	"math"
+	"slices"
 
 	"github.com/fzipp/astar"
 )
@@ -215,8 +221,8 @@ func (g graph[Node]) link(a, b Node) graph[Node] {
 }
 
 // Neighbours returns the neighbour nodes of node n in the graph.
-func (g graph[Node]) Neighbours(n Node) []Node {
-	return g[n]
+func (g graph[Node]) Neighbours(n Node) iter.Seq[Node] {
+	return slices.Values(g[n])
 }
 ```
 
