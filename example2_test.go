@@ -7,7 +7,6 @@ package astar_test
 import (
 	"fmt"
 	"image"
-	"iter"
 	"math"
 
 	"github.com/fzipp/astar"
@@ -62,9 +61,9 @@ func ExampleFindPath_maze() {
 
 // distance is our cost function. We use points as nodes, so we
 // calculate their Euclidean distance.
-func distance(p, q image.Point) float64 {
+func distance(p, q image.Point) float32 {
 	d := q.Sub(p)
-	return math.Sqrt(float64(d.X*d.X + d.Y*d.Y))
+	return float32(math.Sqrt(float64(d.X*d.X + d.Y*d.Y)))
 }
 
 type floorPlan []string
@@ -77,17 +76,16 @@ var offsets = [...]image.Point{
 }
 
 // Neighbours implements the astar.Graph[Node] interface (with Node = image.Point).
-func (f floorPlan) Neighbours(p image.Point) iter.Seq[image.Point] {
-	return func(yield func(image.Point) bool) {
-		for _, off := range offsets {
-			q := p.Add(off)
-			if f.isFreeAt(q) {
-				if !yield(q) {
-					return
-				}
-			}
+func (f floorPlan) Neighbours(p image.Point) []image.Point {
+	list := make([]image.Point, 0, len(f))
+	for _, off := range offsets {
+		q := p.Add(off)
+		if f.isFreeAt(q) {
+			list = append(list, q)
 		}
 	}
+
+	return list
 }
 
 func (f floorPlan) isFreeAt(p image.Point) bool {

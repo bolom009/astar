@@ -6,12 +6,9 @@ package astar_test
 
 import (
 	"fmt"
-	"image"
-	"iter"
-	"math"
-	"slices"
-
 	"github.com/fzipp/astar"
+	"image"
+	"math"
 )
 
 func ExampleFindPath() {
@@ -56,9 +53,9 @@ func ExampleFindPath() {
 
 // nodeDist is our cost function. We use points as nodes, so we
 // calculate their Euclidean distance.
-func nodeDist(p, q image.Point) float64 {
+func nodeDist(p, q image.Point) float32 {
 	d := q.Sub(p)
-	return math.Sqrt(float64(d.X*d.X + d.Y*d.Y))
+	return float32(math.Sqrt(float64(d.X*d.X + d.Y*d.Y)))
 }
 
 // graph is represented by an adjacency list.
@@ -76,6 +73,6 @@ func (g graph[Node]) link(a, b Node) graph[Node] {
 }
 
 // Neighbours returns the neighbour nodes of node n in the graph.
-func (g graph[Node]) Neighbours(n Node) iter.Seq[Node] {
-	return slices.Values(g[n])
+func (g graph[Node]) Neighbours(n Node) []Node {
+	return g[n]
 }

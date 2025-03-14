@@ -7,19 +7,18 @@ package astar
 
 import (
 	"container/heap"
-	"iter"
 )
 
 // The Graph interface is the minimal interface a graph data structure
 // must satisfy to be suitable for the A* algorithm.
 type Graph[Node any] interface {
 	// Neighbours returns the neighbour nodes of node n in the graph.
-	Neighbours(n Node) iter.Seq[Node]
+	Neighbours(n Node) []Node
 }
 
 // A CostFunc is a function that returns a cost for the transition
 // from node a to node b.
-type CostFunc[Node any] func(a, b Node) float64
+type CostFunc[Node any] func(a, b Node) float32
 
 // A Path is a sequence of nodes in a graph.
 type Path[Node any] []Node
@@ -39,6 +38,7 @@ func (p Path[Node]) last() Node {
 // additional node n.
 func (p Path[Node]) cont(n Node) Path[Node] {
 	cp := make([]Node, len(p), len(p)+1)
+	//cp := slices.Clone(p)
 	copy(cp, p)
 	cp = append(cp, n)
 	return cp
@@ -46,7 +46,7 @@ func (p Path[Node]) cont(n Node) Path[Node] {
 
 // Cost calculates the total cost of path p by applying the cost function d
 // to all path segments and returning the sum.
-func (p Path[Node]) Cost(d CostFunc[Node]) (c float64) {
+func (p Path[Node]) Cost(d CostFunc[Node]) (c float32) {
 	for i := 1; i < len(p); i++ {
 		c += d(p[i-1], p[i])
 	}
@@ -75,7 +75,7 @@ func FindPath[Node comparable](g Graph[Node], start, dest Node, d, h CostFunc[No
 		}
 		closed.Add(n)
 
-		for nb := range g.Neighbours(n) {
+		for _, nb := range g.Neighbours(n) {
 			cp := p.cont(nb)
 			heap.Push(pq, &item[Path[Node]]{
 				value:    cp,

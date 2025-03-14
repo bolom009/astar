@@ -31,7 +31,7 @@ package astar
 // An item is something we manage in a priority queue.
 type item[T any] struct {
 	value    T       // The value of the item; arbitrary.
-	priority float64 // The priority of the item in the queue.
+	priority float32 // The priority of the item in the queue.
 }
 
 // A priorityQueue implements heap.Interface and holds items.
