@@ -1,9 +1,5 @@
 # astar
 
-[![PkgGoDev](https://pkg.go.dev/badge/github.com/fzipp/astar)](https://pkg.go.dev/github.com/fzipp/astar)
-![Build Status](https://github.com/fzipp/astar/workflows/build/badge.svg)
-[![Go Report Card](https://goreportcard.com/badge/github.com/fzipp/astar)](https://goreportcard.com/report/github.com/fzipp/astar)
-
 Package astar implements the
 [A* search algorithm](https://en.wikipedia.org/wiki/A*_search_algorithm)
 for finding least-cost paths.
@@ -38,7 +34,7 @@ import (
 	"iter"
 	"math"
 
-	"github.com/fzipp/astar"
+	"github.com/bolom009/astar"
 )
 
 func main() {
@@ -74,9 +70,9 @@ func main() {
 
 // nodeDist is our cost function. We use points as nodes, so we
 // calculate their Euclidean distance.
-func nodeDist(p, q image.Point) float64 {
+func nodeDist(p, q image.Point) float32 {
 	d := q.Sub(p)
-	return math.Sqrt(float64(d.X*d.X + d.Y*d.Y))
+	return float32(math.Sqrt(float64(d.X*d.X + d.Y*d.Y)))
 }
 
 type floorPlan []string
@@ -90,16 +86,15 @@ var offsets = [...]image.Point{
 
 // Neighbours implements the astar.Graph[Node] interface (with Node = image.Point).
 func (f floorPlan) Neighbours(p image.Point) iter.Seq[image.Point] {
-	return func(yield func(image.Point) bool) {
-		for _, off := range offsets {
-			q := p.Add(off)
-			if f.isFreeAt(q) {
-				if !yield(q) {
-					return
-				}
-			}
+	list := make([]image.Point, 0, len(f))
+	for _, off := range offsets {
+		q := p.Add(off)
+		if f.isFreeAt(q) {
+			list = append(list, q)
 		}
 	}
+
+	return list
 }
 
 func (f floorPlan) isFreeAt(p image.Point) bool {
@@ -162,7 +157,7 @@ import (
 	"math"
 	"slices"
 
-	"github.com/fzipp/astar"
+	"github.com/bolom009/astar"
 )
 
 func main() { 
@@ -201,9 +196,9 @@ func main() {
 
 // nodeDist is our cost function. We use points as nodes, so we
 // calculate their Euclidean distance.
-func nodeDist(p, q image.Point) float64 {
+func nodeDist(p, q image.Point) float32 {
 	d := q.Sub(p)
-	return math.Sqrt(float64(d.X*d.X + d.Y*d.Y))
+	return float32(math.Sqrt(float64(d.X*d.X + d.Y*d.Y)))
 }
 
 // graph is represented by an adjacency list.
@@ -221,8 +216,8 @@ func (g graph[Node]) link(a, b Node) graph[Node] {
 }
 
 // Neighbours returns the neighbour nodes of node n in the graph.
-func (g graph[Node]) Neighbours(n Node) iter.Seq[Node] {
-	return slices.Values(g[n])
+func (g graph[Node]) Neighbours(n Node) []Node {
+	return g[n]
 }
 ```
 

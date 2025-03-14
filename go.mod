@@ -1,3 +1,3 @@
-module github.com/fzipp/astar
+module github.com/bolom009/astar
 
 go 1.23.0
