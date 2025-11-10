@@ -5,24 +5,25 @@
 package astar
 
 import (
-	"container/heap"
 	"testing"
+
+	"github.com/bolom009/astar/heap"
 )
 
 func TestPushPop(t *testing.T) {
 	pq := &priorityQueue[string]{}
 	heap.Init(pq)
 
-	want := "ebdac"
-	heap.Push(pq, &item[string]{value: "a", priority: 1.2})
-	heap.Push(pq, &item[string]{value: "b", priority: 5})
-	heap.Push(pq, &item[string]{value: "c", priority: -0.4})
-	heap.Push(pq, &item[string]{value: "d", priority: 3.7})
-	heap.Push(pq, &item[string]{value: "e", priority: 11})
+	want := "cadbe"
+	heap.Push(pq, nodeItem[string]{item: "a", priority: 1.2})
+	heap.Push(pq, nodeItem[string]{item: "b", priority: 5})
+	heap.Push(pq, nodeItem[string]{item: "c", priority: -0.4})
+	heap.Push(pq, nodeItem[string]{item: "d", priority: 3.7})
+	heap.Push(pq, nodeItem[string]{item: "e", priority: 11})
 
 	s := ""
 	for pq.Len() > 0 {
-		s += heap.Pop(pq).(*item[string]).value
+		s += heap.Pop(pq).item
 	}
 
 	if s != want {

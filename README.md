@@ -8,8 +8,8 @@ for finding least-cost paths.
 
 In order to use the `astar.FindPath` function to find the least-cost path
 between two nodes of a graph you need a graph data structure that implements
-the `Neighbours` method to satisfy the `astar.Graph[Node]` interface and a
-cost function. It is up to you how the graph is internally implemented.
+the `Neighbours` method to satisfy the `astar.Graph[Node]` interface and
+hash, cost functions. It is up to you how the graph is internally implemented.
 
 ### A maze
 
@@ -59,7 +59,7 @@ func main() {
 	dest := image.Pt(13, 1)  // Top right corner
 
 	// Find the shortest path
-	path := astar.FindPath[image.Point](maze, start, dest, nodeDist, nodeDist)
+	path := astar.FindPath[image.Point](maze, start, dest, hashPoint, nodeDist, nodeDist)
 
 	// Mark the path with dots before printing
 	for _, p := range path {
@@ -73,6 +73,21 @@ func main() {
 func nodeDist(p, q image.Point) float32 {
 	d := q.Sub(p)
 	return float32(math.Sqrt(float64(d.X*d.X + d.Y*d.Y)))
+}
+
+func hashPoint(p image.Point) int64 {
+	qx := quantizeFloat(float32(p.X))
+	qy := quantizeFloat(float32(p.Y))
+
+	var hash uint64 = 14695981039346656037
+	hash = (hash * 1099511628211) ^ uint64(qx)
+	hash = (hash * 1099511628211) ^ uint64(qy)
+
+	return int64(hash)
+}
+
+func quantizeFloat(f float32) int64 {
+	return int64(f * 1e6)
 }
 
 type floorPlan []string
@@ -182,7 +197,7 @@ func main() {
 		link(p8, p9)
 
 	// Find the shortest path from p1 to p9
-	p := astar.FindPath[image.Point](g, p1, p9, nodeDist, nodeDist)
+	p := astar.FindPath[image.Point](g, p1, p9, hashPoint, nodeDist, nodeDist)
 
 	// Output the result
 	if p == nil {
@@ -206,6 +221,21 @@ type graph[Node comparable] map[Node][]Node
 
 func newGraph[Node comparable]() graph[Node] {
 	return make(map[Node][]Node)
+}
+
+func hashPoint(p image.Point) int64 {
+	qx := quantizeFloat(float32(p.X))
+	qy := quantizeFloat(float32(p.Y))
+
+	var hash uint64 = 14695981039346656037
+	hash = (hash * 1099511628211) ^ uint64(qx)
+	hash = (hash * 1099511628211) ^ uint64(qy)
+
+	return int64(hash)
+}
+
+func quantizeFloat(f float32) int64 {
+	return int64(f * 1e6)
 }
 
 // link creates a bi-directed edge between nodes a and b.
